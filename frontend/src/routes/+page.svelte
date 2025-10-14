@@ -102,6 +102,11 @@
             }
         };
 
+        // Limit FPS to 15
+        const targetFPS = 15;
+        const frameInterval = 1000 / targetFPS;  // ms per frame
+        let lastFrameTime = 0;
+
         // Webcam setup
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
             .then(stream => {
@@ -109,17 +114,24 @@
                 video.srcObject = stream;
                 video.play();
 
-                const sendFrame = () => {
+                const sendFrame = (timestamp) => {
                     if (!mediaStream?.active) return;
 
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    if (!timestamp) timestamp = performance.now();
+                    const elapsed = timestamp - lastFrameTime;
 
-                    if (ws.readyState === WebSocket.OPEN) {
-                        canvas.toBlob(blob => {
-                            if (blob) {
-                                ws.send(blob);
-                            }
-                        }, 'image/jpeg', 0.4);
+                    if (elapsed > frameInterval) {
+                        lastFrameTime = timestamp;
+
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        if (ws.readyState === WebSocket.OPEN) {
+                            canvas.toBlob(blob => {
+                                if (blob) {
+                                    ws.send(blob);
+                                }
+                            }, 'image/jpeg', 0.4);
+                        }
                     }
 
                     requestAnimationFrame(sendFrame);
@@ -142,7 +154,6 @@
         };
     });
 </script>
-
 
 <svelte:window on:keydown={handleKeydown} on:resize={updateMainMenuSelector} />
 

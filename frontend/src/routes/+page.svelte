@@ -1,9 +1,8 @@
 <script>
     import { onMount } from 'svelte';
-    import { goto } from '$app/navigation'; // SvelteKit's programmatic navigation
+    import { goto } from '$app/navigation';
 
-    // --- STATE & CONFIG ---
-    // The menu items are updated, and links are converted to SvelteKit paths
+    // --- STATE & CONFIG (Menu) ---
     const mainMenuItems = [
         { text: 'Food', href: '/food' },
         { text: 'Greet', href: '/greet' },
@@ -16,23 +15,19 @@
     let itemWidth = 0;
     let offset = 0;
 
-    // --- DOM ELEMENT REFERENCES (Svelte's `bind:this`) ---
+    // --- DOM ELEMENT REFERENCES ---
     let menuItemElements = [];
 
-    // --- CORE FUNCTION ---
-    // This function calculates the necessary offset to center the selected item.
+    // --- CORE MENU FUNCTION ---
     function updateMainMenuSelector() {
-        // Ensure the element has been rendered and has a width
         if (!menuItemElements[0] || menuItemElements[0].offsetWidth === 0) return;
-
         itemWidth = menuItemElements[0].offsetWidth;
         const middleIndex = Math.floor(mainMenuItems.length / 2);
         offset = (middleIndex - selectedIndex) * itemWidth;
     }
     
-    // --- KEYBOARD EVENT HANDLER ---
+    // --- KEYBOARD EVENT HANDLER (Menu) ---
     function handleKeydown(e) {
-        // Prevent default browser actions for navigation keys
         if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'Enter'].includes(e.key)) {
             e.preventDefault();
         }
@@ -46,21 +41,90 @@
                 break;
             case 'ArrowDown':
                 const selectedItem = mainMenuItems[selectedIndex];
-                // Navigate if the selected item has a link
                 if (selectedItem.href) {
                     goto(selectedItem.href);
                 }
                 break;
-            // The 'Enter' case remains empty as in the original code.
         }
         updateMainMenuSelector();
     }
 
-    // --- LIFECYCLE & REACTIVITY ---
-    // onMount is Svelte's equivalent of window.onload
+    // --- LIFECYCLE HOOK ---
     onMount(() => {
+        // Initialize the main menu
         selectedIndex = Math.floor(mainMenuItems.length / 2);
         updateMainMenuSelector();
+
+        // ---- START: Background Webcam and WebSocket Logic ----
+        
+        // 1. Create video and canvas elements in memory
+        const video = document.createElement('video');
+        video.width = 640;
+        video.height = 480;
+        video.autoplay = true;
+        video.muted = true;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const context = canvas.getContext("2d");
+
+        // 2. Connect to WebSocket server
+        const ws = new WebSocket("ws://localhost:8765");
+        let mediaStream = null;
+
+        ws.onopen = () => console.log("Connected to WebSocket server");
+        ws.onclose = () => console.log("Disconnected from server");
+
+        // 3. Get webcam stream
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                mediaStream = stream;
+                video.srcObject = stream;
+                video.play();
+
+                // 4. Capture and send frames periodically
+                const sendFrame = () => {
+                    if (!mediaStream?.active) return;
+
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    if (ws.readyState === WebSocket.OPEN) {
+                        // --- MODIFICATION START ---
+
+                        // OLD: Convert to Base64 string
+                        // const dataURL = canvas.toDataURL("image/jpeg");
+                        // const base64Data = dataURL.split(",")[1];
+                        // ws.send(base64Data);
+
+                        // NEW: Convert to binary Blob and send
+                        // canvas.toBlob() is asynchronous. The sending logic happens in the callback.
+                        canvas.toBlob(blob => {
+                            if (blob) {
+                                ws.send(blob);
+                            }
+                        }, 'image/jpeg', 0.8); // 0.8 is the quality (0.0 to 1.0)
+                        
+                        // --- MODIFICATION END ---
+                    }
+                    requestAnimationFrame(sendFrame);
+                };
+                sendFrame();
+            })
+            .catch(err => {
+                console.error("Error accessing webcam:", err);
+            });
+            
+        // 5. Cleanup function
+        return () => {
+            console.log("Component unmounting: Cleaning up resources.");
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+        };
     });
 </script>
 
@@ -69,7 +133,6 @@
 <div class="main-menu">
     <div class="main-menu__container">
         <div class="main-menu__selector-circle"></div>
-
         <div class="main-menu__options-container" style="transform: translateX({offset}px);">
             {#each mainMenuItems as item, index}
                 <div

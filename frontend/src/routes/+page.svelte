@@ -70,7 +70,7 @@
         canvas.height = 480;
         const context = canvas.getContext("2d");
 
-        const ws = new WebSocket("ws://localhost:8765");
+        const ws = new WebSocket("ws://192.168.14.127:8765");
         let mediaStream = null;
 
         ws.onopen = () => console.log("✅ Connected to WebSocket server");
@@ -119,7 +119,7 @@
                             if (blob) {
                                 ws.send(blob);
                             }
-                        }, 'image/jpeg', 0.8);
+                        }, 'image/jpeg', 0.4);
                     }
 
                     requestAnimationFrame(sendFrame);

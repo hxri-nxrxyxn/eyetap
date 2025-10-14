@@ -16,7 +16,7 @@ async def message_handler(websocket):
             if isinstance(message, bytes):
                 # Convert the byte data to a NumPy array
                 np_arr = np.frombuffer(message, np.uint8)
-                
+               
                 # Decode the NumPy array as a JPEG image
                 frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
@@ -28,7 +28,7 @@ async def message_handler(websocket):
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
                 # ----------------------------------------
-            
+           
             # 2. CHECK IF THE MESSAGE IS TEXT (A JSON EVENT)
             elif isinstance(message, str):
                 try:
@@ -53,7 +53,7 @@ async def main():
     host = '0.0.0.0'
     port = 8765
     print(f"Starting WebSocket server on ws://{host}:{port}")
-    
+   
     # Increase the max message size to handle larger video frames
     async with websockets.serve(message_handler, host, port, max_size=1024*1024*4):
         await asyncio.Future()  # Run forever

@@ -1,13 +1,16 @@
+# client.py
 import cv2
 import numpy as np
 import websockets
 import asyncio
 import threading
 import time
+import base64
 
 class WebSocketVideoStream:
     """
-    A class to receive a video stream from a WebSocket and behave like cv2.VideoCapture.
+    Receives a Base64 encoded video stream from a WebSocket and
+    behaves like a cv2.VideoCapture object.
     """
     def __init__(self, websocket_url):
         self.websocket_url = websocket_url
@@ -23,17 +26,17 @@ class WebSocketVideoStream:
         print("Starting WebSocket client thread...")
         self.is_running = True
         self.thread.start()
-        # Give the connection a moment to establish
-        time.sleep(2) 
-        print("Client thread started.")
 
     async def _receiver(self):
-        """The core coroutine to connect to the WebSocket and receive frames."""
+        """The core coroutine to connect and receive frames."""
         async with websockets.connect(self.websocket_url) as websocket:
-            print(f"Connected to WebSocket server at {self.websocket_url}")
+            print(f"✅ Connected to WebSocket server at {self.websocket_url}")
             async for message in websocket:
-                # Assuming the message is the raw bytes of a JPEG image
-                np_arr = np.frombuffer(message, np.uint8)
+                # Decode the Base64 string back to bytes
+                decoded_data = base64.b64decode(message)
+                
+                # Convert bytes to a NumPy array for OpenCV
+                np_arr = np.frombuffer(decoded_data, np.uint8)
                 frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
                 
                 # Use a lock to safely update the latest frame
@@ -53,7 +56,6 @@ class WebSocketVideoStream:
         """
         Mimics the cv2.VideoCapture.read() method.
         Returns a tuple (boolean, frame).
-        The boolean is True if a frame is available, False otherwise.
         """
         with self.lock:
             if self.latest_frame is not None:
@@ -62,46 +64,36 @@ class WebSocketVideoStream:
             else:
                 return False, None
 
-    def isOpened(self):
-        """Mimics the cv2.VideoCapture.isOpened() method."""
-        return self.is_running and self.latest_frame is not None
-
     def stop(self):
         """Stops the client."""
         print("Stopping WebSocket client.")
         self.is_running = False
-        # The thread will exit because the asyncio loop will end when the connection is closed
-        # or an error occurs. Since it's a daemon, it will be cleaned up automatically.
-
 
 # --- Main execution block to demonstrate usage ---
 if __name__ == "__main__":
-    # ⚠️ IMPORTANT: Replace with the actual URL of your WebSocket server
-    WEBSOCKET_URL = "ws://192.168.14.111:8765"
+    # ⚠️ IMPORTANT: Replace with the actual IP of your server
+    WEBSOCKET_URL = "ws://localhost:8765" 
 
-    # Here is what you asked for: initialising 'webcam' with your video stream
     webcam = WebSocketVideoStream(WEBSOCKET_URL)
     webcam.start()
 
-    if not webcam.isOpened():
-        print("Error: Could not connect to WebSocket stream. Please ensure the server is running.")
-    else:
-        print("Successfully connected to stream. Press 'q' to quit.")
-        while True:
-            # The usage is now identical to cv2.VideoCapture
-            ret, frame = webcam.read()
+    print("Connecting to stream... Press 'q' to quit.")
 
-            if not ret:
-                print("Waiting for frame...")
-                time.sleep(0.1)
-                continue
-            
-            # Display the resulting frame
-            cv2.imshow('WebSocket Video Stream', frame)
+    # Robust loop that patiently waits for the first frame
+    while True:
+        ret, frame = webcam.read()
 
-            # Press 'q' on the keyboard to exit the loop
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+        if not ret:
+            print("⏳ Waiting for first frame...")
+            time.sleep(0.5)
+            continue
+        
+        # Display the resulting frame
+        cv2.imshow('WebSocket Base64 Video Stream', frame)
+
+        # Press 'q' on the keyboard to exit the loop
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     # Clean up
     webcam.stop()

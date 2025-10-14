@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calling...</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: darkred;
+            color: white;
+            /* This centers everything vertically and horizontally */
+            display: grid;
+            place-content: center;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        .calling-text {
+            /* Text is now much larger */
+            font-size: 12vw;
+            font-weight: bold;
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .exit-button {
+            font-size: 4vw;
+            font-weight: bold;
+            /* MODIFIED: Increased the top margin to move it down */
+            margin-top: 4rem; 
+            /* MODIFIED: Added the new color */
+            color: #ffffff33; 
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <div class="calling-text">Calling</div>
+        <div class="exit-button">X</div>
+    </div>
+
+    <script>
+        // Simplified script: just listens for the down arrow
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+
+</body>
+</html>

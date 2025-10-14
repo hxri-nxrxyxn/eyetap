@@ -1,0 +1,230 @@
+/* --- Basic Reset & Setup --- */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden; /* Prevent page scroll with arrow keys */
+}
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* --- BEM Block: page --- */
+.page {
+    background-color: #111827; /* bg-gray-900 */
+    color: #ffffff; /* text-white */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- BEM Block: main-menu --- */
+.main-menu {
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.main-menu__container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 200px;
+}
+
+.main-menu__selector-circle {
+    position: absolute;
+    width: 12rem; /* w-48 */
+    height: 12rem; /* h-48 */
+    border-radius: 9999px; /* rounded-full */
+    border: 8px solid #ffffff; /* border-8 border-white */
+    transition: border-color 0.3s ease-in-out;
+    pointer-events: none;
+}
+
+.main-menu__options-container {
+    display: flex;
+    align-items: center;
+    transition: transform 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+.main-menu__option {
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: 700; /* font-bold */
+    color: #ffffff; /* text-white */
+    transition: all 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    opacity: 0.5;
+    transform: scale(0.8);
+}
+
+/* Modifier for active option */
+.main-menu__option--is-active {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* --- BEM Block: options-grid --- */
+.options-grid {
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.options-grid__title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.options-grid__container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    width: 100%;
+    max-width: 42rem; /* max-w-5xl */
+}
+
+.options-grid__button {
+    aspect-ratio: 1 / 1;
+    border-radius: 1rem; /* rounded-2xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 4px solid transparent;
+    outline: 2px solid transparent;
+    outline-offset: 4px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.options-grid__button-text {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+}
+
+/* Modifier for keyboard selection */
+.options-grid__button--selected {
+    border-color: #f59e0b; /* A bright, high-contrast amber */
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
+    background-color: rgba(245, 158, 11, 0.1);
+}
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1a1a2e; /* Dark navy background */
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Prevent scrollbars from appearing when content moves */
+}
+
+/* Base style for any menu screen */
+.menu-screen {
+    width: 100%;
+    display: flex; /* Flex is used by JS to show/hide screens */
+    justify-content: center;
+    align-items: center;
+    position: absolute; /* Allows screens to overlap and be controlled by display property */
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+
+/* Main container for the circular selector and options */
+.menu-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* For absolute positioning of the circle */
+    width: 100%; /* Take full width to center content */
+}
+
+/* The stationary white circle */
+.menu-selector-circle {
+    width: 90px;
+    height: 90px;
+    border: 3px solid #fff;
+    border-radius: 50%; /* Makes it a circle */
+    position: absolute;
+    z-index: 1; /* Ensure circle is above options, if options were to overlap */
+    pointer-events: none; /* Allows clicks to pass through to elements behind */
+}
+
+/* Container for all the menu options (Food, Greet, X, Help, Binge / Water, X, Hungry) */
+.options-container {
+    display: flex;
+    align-items: center;
+    gap: 50px; /* Space between options */
+    transition: transform 0.2s ease-out; /* Smooth movement when navigating */
+    position: relative;
+    z-index: 0;
+}
+
+/* Individual menu options text */
+.menu-option {
+    color: #fff;
+    text-decoration: none; /* No underline by default */
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    padding: 10px;
+    position: relative; /* Needed for the ::after pseudo-element */
+    white-space: nowrap; /* Prevent options from wrapping to next line */
+    cursor: pointer; /* Indicate it's clickable, even if only keyboard nav is used */
+    transition: color 0.2s ease;
+}
+
+/* Active state for the menu option text */
+.menu-option--is-active {
+    color: #fff; /* Keep color consistent */
+}
+
+/* Underline for the active menu option */
+.menu-option--is-active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background-color: #fff;
+    border-radius: 2px;
+}
+
+/* Optional: Subtle hover effect for mouse users */
+.menu-option:not(.menu-option--is-active):hover {
+    color: #cccccc;
+}
+

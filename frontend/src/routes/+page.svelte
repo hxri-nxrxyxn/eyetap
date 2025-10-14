@@ -14,8 +14,6 @@
     let selectedIndex = 0;
     let itemWidth = 0;
     let offset = 0;
-
-    // --- DOM ELEMENT REFERENCES ---
     let menuItemElements = [];
 
     // --- CORE MENU FUNCTION ---
@@ -25,39 +23,42 @@
         const middleIndex = Math.floor(mainMenuItems.length / 2);
         offset = (middleIndex - selectedIndex) * itemWidth;
     }
-    
-    // --- KEYBOARD EVENT HANDLER (Menu) ---
+
+    function moveLeft() {
+        selectedIndex = (selectedIndex - 1 + mainMenuItems.length) % mainMenuItems.length;
+        updateMainMenuSelector();
+    }
+
+    function moveRight() {
+        selectedIndex = (selectedIndex + 1) % mainMenuItems.length;
+        updateMainMenuSelector();
+    }
+
+    function activateSelected() {
+        const selectedItem = mainMenuItems[selectedIndex];
+        if (selectedItem.href) {
+            goto(selectedItem.href);
+        }
+    }
+
+    // --- KEYBOARD EVENT HANDLER ---
     function handleKeydown(e) {
         if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'Enter'].includes(e.key)) {
             e.preventDefault();
         }
 
         switch (e.key) {
-            case 'ArrowRight':
-                selectedIndex = (selectedIndex + 1) % mainMenuItems.length;
-                break;
-            case 'ArrowLeft':
-                selectedIndex = (selectedIndex - 1 + mainMenuItems.length) % mainMenuItems.length;
-                break;
-            case 'ArrowDown':
-                const selectedItem = mainMenuItems[selectedIndex];
-                if (selectedItem.href) {
-                    goto(selectedItem.href);
-                }
-                break;
+            case 'ArrowRight': moveRight(); break;
+            case 'ArrowLeft': moveLeft(); break;
+            case 'ArrowDown': activateSelected(); break;
         }
-        updateMainMenuSelector();
     }
 
     // --- LIFECYCLE HOOK ---
     onMount(() => {
-        // Initialize the main menu
         selectedIndex = Math.floor(mainMenuItems.length / 2);
         updateMainMenuSelector();
 
-        // ---- START: Background Webcam and WebSocket Logic ----
-        
-        // 1. Create video and canvas elements in memory
         const video = document.createElement('video');
         video.width = 640;
         video.height = 480;
@@ -69,44 +70,58 @@
         canvas.height = 480;
         const context = canvas.getContext("2d");
 
-        // 2. Connect to WebSocket server
         const ws = new WebSocket("ws://localhost:8765");
         let mediaStream = null;
 
-        ws.onopen = () => console.log("Connected to WebSocket server");
-        ws.onclose = () => console.log("Disconnected from server");
+        ws.onopen = () => console.log("✅ Connected to WebSocket server");
+        ws.onclose = () => console.log("❌ Disconnected from server");
 
-        // 3. Get webcam stream
+        // ✅ GAZE EVENT HANDLING
+        ws.onmessage = (event) => {
+            if (typeof event.data === "string") {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "gaze_event") {
+                        console.log("👁️ Gaze event:", data.direction);
+
+                        switch (data.direction) {
+                            case "signal_left":
+                                moveLeft();
+                                break;
+                            case "signal_right":
+                                moveRight();
+                                break;
+                            case "signal_center":
+                                // Optional: Do nothing or highlight?
+                                break;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error parsing WebSocket message:", err);
+                }
+            }
+        };
+
+        // Webcam setup
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
             .then(stream => {
                 mediaStream = stream;
                 video.srcObject = stream;
                 video.play();
 
-                // 4. Capture and send frames periodically
                 const sendFrame = () => {
                     if (!mediaStream?.active) return;
 
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
+
                     if (ws.readyState === WebSocket.OPEN) {
-                        // --- MODIFICATION START ---
-
-                        // OLD: Convert to Base64 string
-                        // const dataURL = canvas.toDataURL("image/jpeg");
-                        // const base64Data = dataURL.split(",")[1];
-                        // ws.send(base64Data);
-
-                        // NEW: Convert to binary Blob and send
-                        // canvas.toBlob() is asynchronous. The sending logic happens in the callback.
                         canvas.toBlob(blob => {
                             if (blob) {
                                 ws.send(blob);
                             }
-                        }, 'image/jpeg', 0.8); // 0.8 is the quality (0.0 to 1.0)
-                        
-                        // --- MODIFICATION END ---
+                        }, 'image/jpeg', 0.8);
                     }
+
                     requestAnimationFrame(sendFrame);
                 };
                 sendFrame();
@@ -114,10 +129,10 @@
             .catch(err => {
                 console.error("Error accessing webcam:", err);
             });
-            
-        // 5. Cleanup function
+
+        // Cleanup
         return () => {
-            console.log("Component unmounting: Cleaning up resources.");
+            console.log("🧹 Cleaning up...");
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
             }
@@ -127,6 +142,7 @@
         };
     });
 </script>
+
 
 <svelte:window on:keydown={handleKeydown} on:resize={updateMainMenuSelector} />
 

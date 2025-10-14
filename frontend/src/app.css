@@ -1,0 +1,218 @@
+/* --- Global Reset & Setup --- */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Inter";
+}
+
+body {
+	margin: 0;
+	overflow: hidden;
+	background-color: black;
+	color: #fff;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* --- BEM Block: page --- */
+.page {
+	background-color: black;
+	color: #ffffff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	overflow: hidden;
+}
+
+/* --- BEM Block: main-menu --- */
+.main-menu {
+	width: 100%;
+	height: 100%;
+	padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2rem;
+}
+
+.main-menu__container {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 350px;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+}
+
+.main-menu__selector-circle {
+	position: absolute;
+	width: 22rem;
+	height: 22rem;
+	border-radius: 9999px;
+	border: 2px solid #55EFC4;
+	transition: border-color 0.3s ease-in-out;
+	pointer-events: none;
+}
+
+.main-menu__options-container {
+	display: flex;
+	align-items: center;
+	transition: transform 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+.main-menu__option {
+	width: 350px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 3.25rem;
+	font-weight: 700;
+	color: #ffffff;
+	transition: all 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+	opacity: 0.5;
+	transform: scale(0.8);
+}
+
+.main-menu__option--is-active {
+	opacity: 1;
+}
+
+/* --- BEM Block: options-grid --- */
+.options-grid {
+	width: 100%;
+	height: 100%;
+	padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2rem;
+}
+
+.options-grid__title {
+	font-size: 2.25rem;
+	font-weight: 700;
+	letter-spacing: -0.025em;
+	color: #e5e7eb;
+	margin-bottom: 2rem;
+}
+
+.options-grid__container {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2rem;
+	width: 100%;
+	max-width: 42rem;
+}
+
+.options-grid__button {
+	aspect-ratio: 1 / 1;
+	border-radius: 1rem;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+	border: 4px solid transparent;
+	outline: 2px solid transparent;
+	outline-offset: 4px;
+	cursor: pointer;
+	color: #ffffff;
+}
+
+.options-grid__button-text {
+	font-size: 1.875rem;
+	font-weight: 700;
+}
+
+.options-grid__button--selected {
+	border-color: #f59e0b;
+	transform: scale(1.05);
+	box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
+	background-color: rgba(245, 158, 11, 0.1);
+}
+
+/* --- BEM Block: menu-screen --- */
+.menu-screen {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+}
+
+.menu-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	width: 100%;
+}
+
+.menu-selector-circle {
+	width: 90px;
+	height: 90px;
+	border: 3px solid #fff;
+	border-radius: 50%;
+	position: absolute;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.options-container {
+	display: flex;
+	align-items: center;
+	gap: 50px;
+	transition: transform 0.2s ease-out;
+	position: relative;
+	z-index: 0;
+}
+
+.menu-option {
+	color: #fff;
+	text-decoration: none;
+	font-size: 1.8rem;
+	letter-spacing: 2px;
+	padding: 10px;
+	position: relative;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color 0.2s ease;
+}
+
+.menu-option--is-active {
+	color: #fff;
+	padding-inline: 5rem;
+}
+
+.menu-option--is-active::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 10px;
+	right: 10px;
+	height: 3px;
+	background-color: #fff;
+	border-radius: 2px;
+}
+
+.menu-option:not(.menu-option--is-active):hover {
+	color: #cccccc;
+}

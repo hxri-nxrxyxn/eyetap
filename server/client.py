@@ -71,8 +71,8 @@ class WebSocketVideoStream:
 
 # --- Main execution block to demonstrate usage ---
 if __name__ == "__main__":
-    # ⚠️ IMPORTANT: Replace with the actual IP of your server
-    WEBSOCKET_URL = "ws://localhost:8765" 
+    # ⚠️ IMPORTANT: Replace with the actual URL of your WebSocket server
+    WEBSOCKET_URL = "ws://192.168.14.111:8765"
 
     webcam = WebSocketVideoStream(WEBSOCKET_URL)
     webcam.start()

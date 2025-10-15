@@ -1,5 +1,8 @@
 # EyeTap
 
+https://github.com/user-attachments/assets/4a6ecfcb-70d0-4287-bc30-58f808343ac5
+
+
 EyeTap is an assistive **web and mobile application** designed for **bedridden patients**, such as those who are paralyzed, injured, or unable to move freely.
 It enables users to interact with a system **using only their eye movements**, providing them with autonomy and a way to communicate or request help effortlessly.
 
